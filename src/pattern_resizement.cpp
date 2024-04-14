@@ -18,28 +18,36 @@ bool checkIfArrayHasCoords(int y, int x, int array[][2], int size)
 	return false;
 }
 
-void addToCoordsArray(int array[][2], int& size, int y, int x)
+void clearCoordsArray()
 {
-	array[size][0] = y;
-	array[size][1] = x;
-	size++;
+	for (int i = 0; i < PATTERN_VECTOR_SIZE; i++) {
+		PATTERN_VECTOR_RESIZED[i][0] = 0;
+		PATTERN_VECTOR_RESIZED[i][1] = 0;
+	}
+	PATTERN_VECTOR_SIZE = 0;
 }
 
-void addOffsetToVector(int array[][2], int patternN)
+void addToCoordsArray(int y, int x)
 {
-	int size = PATTERNS_VECTOR_SIZES[patternN];
+	PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE][0] = y;
+	PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE][1] = x;
+	PATTERN_VECTOR_SIZE++;
+}
+
+void addOffsetToVector(int patternN)
+{
 	bool shouldMirror = PATTERNS_MIRROR[patternN];
 
 	int height = 0, width = 0;
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < PATTERN_VECTOR_SIZE; i++)
 	{
-		if (array[i][0] > height)
+		if (PATTERN_VECTOR_RESIZED[i][0] > height)
 		{
-			height = array[i][0];
+			height = PATTERN_VECTOR_RESIZED[i][0];
 		}
-		if (array[i][1] > width)
+		if (PATTERN_VECTOR_RESIZED[i][1] > width)
 		{
-			width = array[i][1];
+			width = PATTERN_VECTOR_RESIZED[i][1];
 		}
 	}
 	height++; width++;
@@ -61,15 +69,15 @@ void addOffsetToVector(int array[][2], int patternN)
 	}
 	PATTERNS_MIRROR[patternN] = shouldMirror;
 
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < PATTERN_VECTOR_SIZE; i++)
 	{
-		array[i][0] += offset_y;
+		PATTERN_VECTOR_RESIZED[i][0] += offset_y;
 		/*if (array[i][0] > LED_SIDE_COUNT - LED_BUFFER_SIZE)
 		{
 			array[i][0] = LED_SIDE_COUNT - LED_BUFFER_SIZE;
 		}*/
 
-		array[i][1] += offset_x;
+		PATTERN_VECTOR_RESIZED[i][1] += offset_x;
 		/*if (array[i][1] > LED_SIDE_COUNT - LED_BUFFER_SIZE)
 		{
 			array[i][1] = LED_SIDE_COUNT - LED_BUFFER_SIZE;
@@ -77,20 +85,21 @@ void addOffsetToVector(int array[][2], int patternN)
 	}
 }
 
-void convertPatternSize(int array[][2], int size, int patternN)
+void convertPatternSize(uint8_t array[][2], int size)
 {
-	int resizedArrSize = 0;
+	clearCoordsArray();
 
 	int height = 0, width = 0;
 	for (int i = 0; i < size; i++)
 	{
-		if (array[i][0] > height)
+		uint8_t theoretical_height = array[i][0], theoretical_width = array[i][1];
+		if (theoretical_height > height)
 		{
-			height = array[i][0];
+			height = theoretical_height;
 		}
-		if (array[i][1] > width)
+		if (theoretical_width > width)
 		{
-			width = array[i][1];
+			width = theoretical_width;
 		}
 	}
 	height++; width++;
@@ -107,41 +116,41 @@ void convertPatternSize(int array[][2], int size, int patternN)
 
 	for (int i = 0; i <= size; i++)
 	{
-		int new_y = math_round((float)array[i % size][0] * conversionSize), new_x = math_round((float)array[i % size][1] * conversionSize);
+		uint8_t old_x = array[i % size][1], old_y = array[i % size][0];
+		int new_y = math_round((float)old_y * conversionSize), new_x = math_round((float)old_x * conversionSize);
 
 		if (i == 0)
 		{
-			addToCoordsArray(PATTERNS_VECTORS_RESIZED[patternN], resizedArrSize, new_y, new_x);
+			addToCoordsArray(new_y, new_x);
 			continue;
 		}
 		if (conversionSize < 1)
 		{
-			if (!(PATTERNS_VECTORS_RESIZED[patternN][resizedArrSize - 1][0] == new_y && PATTERNS_VECTORS_RESIZED[patternN][resizedArrSize - 1][1] == new_x))
+			if (!(PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == new_y && PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == new_x))
 			{
-				addToCoordsArray(PATTERNS_VECTORS_RESIZED[patternN], resizedArrSize, new_y, new_x);
+				addToCoordsArray(new_y, new_x);
 			}
 			continue;
 		}
 
-		int lastPoint = resizedArrSize - 1;
-		int distance_y = new_y - PATTERNS_VECTORS_RESIZED[patternN][lastPoint][0], distance_x = new_x - PATTERNS_VECTORS_RESIZED[patternN][lastPoint][1];
+		int lastPoint = PATTERN_VECTOR_SIZE - 1;
+		int distance_y = new_y - PATTERN_VECTOR_RESIZED[lastPoint][0], distance_x = new_x - PATTERN_VECTOR_RESIZED[lastPoint][1];
 		int additionalPointsAmount = math_getRoot(distance_x * distance_x + distance_y * distance_y);
 
 		for (int j = 1; j < additionalPointsAmount; j++)
 		{
 			float percentage = (float)j / (float)additionalPointsAmount;
-			int additional_y = PATTERNS_VECTORS_RESIZED[patternN][lastPoint][0] + math_round(percentage * (float)distance_y);
-			int additional_x = PATTERNS_VECTORS_RESIZED[patternN][lastPoint][1] + math_round(percentage * (float)distance_x);
+			int additional_y = PATTERN_VECTOR_RESIZED[lastPoint][0] + math_round(percentage * (float)distance_y);
+			int additional_x = PATTERN_VECTOR_RESIZED[lastPoint][1] + math_round(percentage * (float)distance_x);
 
 			if (j == size && (additional_x == new_x && additional_y == new_y)) { continue; }
-			if (PATTERNS_VECTORS_RESIZED[patternN][resizedArrSize - 1][0] == additional_y && PATTERNS_VECTORS_RESIZED[patternN][resizedArrSize - 1][1] == additional_x) { continue; }
-			addToCoordsArray(PATTERNS_VECTORS_RESIZED[patternN], resizedArrSize, additional_y, additional_x);
+			if (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == additional_y && PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == additional_x) { continue; }
+			addToCoordsArray(additional_y, additional_x);
 		}
 
-		if (i == size || (PATTERNS_VECTORS_RESIZED[patternN][resizedArrSize - 1][0] == new_y && PATTERNS_VECTORS_RESIZED[patternN][resizedArrSize - 1][1] == new_x)) { continue; }
-		addToCoordsArray(PATTERNS_VECTORS_RESIZED[patternN], resizedArrSize, new_y, new_x);
+		if (i == size || (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == new_y && PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == new_x)) { continue; }
+		addToCoordsArray(new_y, new_x);
 	}
-	PATTERNS_VECTOR_SIZES[patternN] = resizedArrSize;
 
-	addOffsetToVector(PATTERNS_VECTORS_RESIZED[patternN], patternN);
+	addOffsetToVector(matrix_regime);
 }

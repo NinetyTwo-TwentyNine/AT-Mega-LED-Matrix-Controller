@@ -9,4 +9,4 @@
 int getPosThroughCoords(int pos_y, int pos_x);
 
 void resetMatrix();
-void playPattern(int array[][2], int patternN);
+void playPattern(int patternN);

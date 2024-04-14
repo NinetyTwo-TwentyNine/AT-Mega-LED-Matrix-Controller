@@ -9,6 +9,7 @@
 
 bool checkIfArrayHasCoords(int y, int x, int array[][2], int size);
 
-void addToCoordsArray(int array[][2], int& size, int y, int x);
-void addOffsetToVector(int array[][2], int patternN);
-void convertPatternSize(int array[][2], int size, int patternN);
+void clearCoordsArray();
+void addToCoordsArray(int y, int x);
+void addOffsetToVector(int patternN);
+void convertPatternSize(uint8_t array[][2], int size);

@@ -35,24 +35,22 @@ void resetMatrix()
     }
 }
 
-void playPattern(int array[][2], int patternN)
+void playPattern(int patternN)
 {
-  int size = PATTERNS_VECTOR_SIZES[patternN];
-
-  int num = pattern_tick % (size*2);
+  int num = pattern_tick % (PATTERN_VECTOR_SIZE*2);
   for (int i = 0; i < LED_COUNT; i++)
   {
     leds[i] = CRGB::Black;
   }
 
   int pos = num/2;
-  int pos_y = array[pos][0], pos_x = array[pos][1];
+  int pos_y = PATTERN_VECTOR_RESIZED[pos][0], pos_x = PATTERN_VECTOR_RESIZED[pos][1];
   leds[getPosThroughCoords(pos_y, pos_x)] = CRGB::Green;
  
   if (pattern_tick != 0)
   {
-  	if (pos > 0) { pos--; } else { pos = size - 1; }
-  	int prev_pos_y = array[pos][0], prev_pos_x = array[pos][1];
+  	if (pos > 0) { pos--; } else { pos = PATTERN_VECTOR_SIZE - 1; }
+  	int prev_pos_y = PATTERN_VECTOR_RESIZED[pos][0], prev_pos_x = PATTERN_VECTOR_RESIZED[pos][1];
 
 	if (!PATTERNS_NOARROW[patternN])
 	{
