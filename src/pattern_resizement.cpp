@@ -143,7 +143,7 @@ void convertPatternSize(uint8_t array[][2], int size)
 			int additional_y = PATTERN_VECTOR_RESIZED[lastPoint][0] + math_round(percentage * (float)distance_y);
 			int additional_x = PATTERN_VECTOR_RESIZED[lastPoint][1] + math_round(percentage * (float)distance_x);
 
-			if (j == size && (additional_x == new_x && additional_y == new_y)) { continue; }
+			if (additional_x == new_x && additional_y == new_y) { continue; }
 			if (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == additional_y && PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == additional_x) { continue; }
 			addToCoordsArray(additional_y, additional_x);
 		}

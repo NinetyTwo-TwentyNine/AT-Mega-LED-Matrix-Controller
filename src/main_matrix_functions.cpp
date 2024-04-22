@@ -22,7 +22,7 @@ int getPosThroughCoords(int pos_y, int pos_x)
 
 void resetMatrix()
 {
-    matrix_reset_button_pressed = !matrix_reset_button_pressed;
+    // matrix_reset_button_pressed = !matrix_reset_button_pressed;
     matrix_enabled = !matrix_enabled;
     if (!matrix_enabled)
     {

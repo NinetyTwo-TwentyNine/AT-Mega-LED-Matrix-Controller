@@ -5,6 +5,19 @@
 
 #include "main.h"
 
+ISR(INT2_vect) {
+  matrix_time_regime = (matrix_time_regime + 1) % TIME_REGIME_COUNT;
+}
+
+ISR(INT1_vect) {
+	matrix_regime = (matrix_regime + 1) % PATTERN_COUNT;
+  setupDefaultPattern();
+  pattern_tick = 0;
+}
+
+ISR(INT0_vect) {
+  resetMatrix();
+}
 
 void setup()
 {
@@ -12,14 +25,16 @@ void setup()
 
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, LED_COUNT);
 
-  DDRC &= ~((1<<1)|(1<<2)|(1<<3));
-  PORTC |= (1<<1)|(1<<2)|(1<<3);
+  // matrix_reset_button_pressed = (~PIND&(1<<0));
 
-  bool reset_button_pressed = (~PINC&(1<<1));
-  matrix_reset_button_pressed = reset_button_pressed;
+  // DDRC &= ~((1<<1)|(1<<2)|(1<<3));
+  // PORTC |= (1<<1)|(1<<2)|(1<<3);
+  DDRD &= ~((1<<0)|(1<<1)|(1<<2));
+  PORTD |= ((1<<0)|(1<<1)|(1<<2));
 
-  matrix_select_button_pressed = (~PINC&(1<<2));
-  matrix_time_button_pressed = (~PINC&(1<<3));
+  EIMSK |= (1<<INT2) | (1<<INT1) | (1<<INT0);
+  EICRA |= (1<<ISC01);
+  sei();
 
   setupDefaultPattern();
 }
@@ -40,34 +55,6 @@ void loop()
   }
 
   // ===== MAIN LOOP FUNCTION =====
-
-  bool reset_button_pressed = (~PINC&(1<<1)), select_button_pressed = (~PINC&(1<<2)), time_button_pressed = (~PINC&(1<<3));
-
-  if (matrix_reset_button_pressed != reset_button_pressed)
-  {
-    resetMatrix();
-  }
-  matrix_reset_button_pressed = reset_button_pressed;
-
-  if (select_button_pressed)
-  {
-	  if (!matrix_select_button_pressed)
-	  {
-		  matrix_regime = (matrix_regime + 1) % PATTERN_COUNT;
-      setupDefaultPattern();
-    	pattern_tick = 0;
-	  }
-  }
-  matrix_select_button_pressed = select_button_pressed;
-
-  if (time_button_pressed)
-  {
-	  if (!matrix_time_button_pressed)
-	  {
-    	matrix_time_regime = (matrix_time_regime + 1) % TIME_REGIME_COUNT;
-	  }
-  }
-  matrix_time_button_pressed = time_button_pressed;
 
   if (!matrix_enabled) { return; }
   playPattern(matrix_regime);
