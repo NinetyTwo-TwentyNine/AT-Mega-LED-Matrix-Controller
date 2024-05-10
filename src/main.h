@@ -12,7 +12,7 @@
 #include "main_matrix_functions.h"
 
 
-#define LED_PIN 6
+#define LED_PIN A6
 #define LED_SIDE_COUNT 16
 #define LED_BUFFER_SIZE 1
 #define LED_COUNT (LED_SIDE_COUNT*LED_SIDE_COUNT)
@@ -45,7 +45,7 @@ inline int PATTERN_VECTOR_SIZE = 0;
 
 inline long pattern_tick = 0, last_serial_time = 0;
 inline int matrix_regime = 2, matrix_time_regime = 1;
-inline bool matrix_enabled = true;
+inline bool matrix_reset_button_pressed, matrix_enabled = true;
 
 inline uint8_t exercise_datapackage[EXERCISE_DATAPACKAGE_SIZE];
 inline CRGB leds[LED_COUNT];
