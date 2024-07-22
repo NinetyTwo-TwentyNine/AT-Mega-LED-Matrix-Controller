@@ -51,6 +51,11 @@ void loop()
 
   // ===== MAIN LOOP FUNCTION =====
 
+  int delayTime = 15 * (matrix_time_regime + 1);
+  if (millis() < last_matrix_time + delayTime) { return; }
+
+  last_matrix_time = millis();
+
   bool reset_button_pressed = (~PIND&(1<<0));
 
   if (matrix_reset_button_pressed != reset_button_pressed)
@@ -61,8 +66,6 @@ void loop()
 
   if (!matrix_enabled) { return; }
   playPattern(matrix_regime);
-  int delayTime = 15 * (matrix_time_regime + 1);
-  delay(delayTime);
 }
 
 void setupDefaultPattern()
@@ -84,24 +87,36 @@ void cleanNewPattern()
   {
     exercise_datapackage[i] = 0;
   }
-
-  PATTERNS_MIRROR[PATTERN_COUNT] = false;
-  PATTERNS_MIRROR_AXIS[PATTERN_COUNT] = false;
-  PATTERNS_NOARROW[PATTERN_COUNT] = false;
 }
 
 void setupNewPattern()
 {
-	int exercise_length = exercise_datapackage[0];
+  int security_code_duplicate = SECURITY_CODE_CONDENSED;
+  for (int i = 0; i < EXERCISE_SECURITY_CODE_LENGTH; i++) {
+    if (security_code_duplicate % 2 != exercise_datapackage[i]) {
+      return;
+    }
+    security_code_duplicate /= 2;
+  }
+
+  security_code_duplicate = SECURITY_CODE_CONDENSED;
+  for (int i = 0; i < EXERCISE_SECURITY_CODE_LENGTH; i++) {
+    if (security_code_duplicate % 2 != exercise_datapackage[EXERCISE_DATAPACKAGE_SIZE - i - 1]) {
+      return;
+    }
+    security_code_duplicate /= 2;
+  }
+  
+
+	int exercise_length = exercise_datapackage[EXERCISE_SECURITY_CODE_LENGTH];
 	uint8_t VECTOR_NEW_EXERCISE[32][2];
 	for (int i = 0; i < exercise_length; i++)
 	{
-		VECTOR_NEW_EXERCISE[i][0] = exercise_datapackage[i * 2 + 1];
-		VECTOR_NEW_EXERCISE[i][1] = exercise_datapackage[i * 2 + 2];
+		VECTOR_NEW_EXERCISE[i][0] = exercise_datapackage[i * 2 + EXERCISE_SECURITY_CODE_LENGTH + 1];
+		VECTOR_NEW_EXERCISE[i][1] = exercise_datapackage[i * 2 + EXERCISE_SECURITY_CODE_LENGTH + 2];
 	}
-	PATTERNS_MIRROR[PATTERN_COUNT] = (exercise_datapackage[129] != 0);
-	//PATTERNS_MIRROR_AXIS[PATTERN_COUNT] = (exercise_datapackage[129] == 2);
-	PATTERNS_NOARROW[PATTERN_COUNT] = (exercise_datapackage[130] != 1);
+	PATTERNS_MIRROR[PATTERN_COUNT] = (exercise_datapackage[EXERCISE_DATAPACKAGE_SIZE - EXERCISE_SECURITY_CODE_LENGTH - 2] != 0);
+	PATTERNS_NOARROW[PATTERN_COUNT] = (exercise_datapackage[EXERCISE_DATAPACKAGE_SIZE - EXERCISE_SECURITY_CODE_LENGTH - 1] != 1);
 
 	convertPatternSize(VECTOR_NEW_EXERCISE, exercise_length);
 	matrix_regime = PATTERN_COUNT;

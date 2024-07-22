@@ -41,14 +41,8 @@ void addOffsetToVector(int patternN)
 	int height = 0, width = 0;
 	for (int i = 0; i < PATTERN_VECTOR_SIZE; i++)
 	{
-		if (PATTERN_VECTOR_RESIZED[i][0] > height)
-		{
-			height = PATTERN_VECTOR_RESIZED[i][0];
-		}
-		if (PATTERN_VECTOR_RESIZED[i][1] > width)
-		{
-			width = PATTERN_VECTOR_RESIZED[i][1];
-		}
+		height = max(height, PATTERN_VECTOR_RESIZED[i][0]);
+		width = max(width, PATTERN_VECTOR_RESIZED[i][1]);
 	}
 	height++; width++;
 
@@ -72,16 +66,12 @@ void addOffsetToVector(int patternN)
 	for (int i = 0; i < PATTERN_VECTOR_SIZE; i++)
 	{
 		PATTERN_VECTOR_RESIZED[i][0] += offset_y;
-		/*if (array[i][0] > LED_SIDE_COUNT - LED_BUFFER_SIZE)
-		{
-			array[i][0] = LED_SIDE_COUNT - LED_BUFFER_SIZE;
-		}*/
+		// PATTERN_VECTOR_RESIZED[i][0] = max(0, PATTERN_VECTOR_RESIZED[i][0]);
+		// PATTERN_VECTOR_RESIZED[i][0] = min(PATTERN_VECTOR_RESIZED[i][0], LED_SIDE_COUNT - LED_BUFFER_SIZE);
 
 		PATTERN_VECTOR_RESIZED[i][1] += offset_x;
-		/*if (array[i][1] > LED_SIDE_COUNT - LED_BUFFER_SIZE)
-		{
-			array[i][1] = LED_SIDE_COUNT - LED_BUFFER_SIZE;
-		}*/
+		// PATTERN_VECTOR_RESIZED[i][1] = max(0, PATTERN_VECTOR_RESIZED[i][1]);
+		// PATTERN_VECTOR_RESIZED[i][1] = min(PATTERN_VECTOR_RESIZED[i][1], LED_SIDE_COUNT - LED_BUFFER_SIZE);
 	}
 }
 
@@ -92,15 +82,8 @@ void convertPatternSize(uint8_t array[][2], int size)
 	int height = 0, width = 0;
 	for (int i = 0; i < size; i++)
 	{
-		uint8_t theoretical_height = array[i][0], theoretical_width = array[i][1];
-		if (theoretical_height > height)
-		{
-			height = theoretical_height;
-		}
-		if (theoretical_width > width)
-		{
-			width = theoretical_width;
-		}
+		height = max(height, array[i][0]);
+		width = max(width, array[i][1]);
 	}
 	height++; width++;
 
@@ -140,11 +123,27 @@ void convertPatternSize(uint8_t array[][2], int size)
 		for (int j = 1; j < additionalPointsAmount; j++)
 		{
 			float percentage = (float)j / (float)additionalPointsAmount;
+			
 			int additional_y = PATTERN_VECTOR_RESIZED[lastPoint][0] + math_round(percentage * (float)distance_y);
-			int additional_x = PATTERN_VECTOR_RESIZED[lastPoint][1] + math_round(percentage * (float)distance_x);
+			additional_y = max(0, additional_y);
+			additional_y = min(additional_y, LED_SIDE_COUNT - LED_BUFFER_SIZE * 2 - 1);
 
-			if (additional_x == new_x && additional_y == new_y) { continue; }
+			int additional_x = PATTERN_VECTOR_RESIZED[lastPoint][1] + math_round(percentage * (float)distance_x);
+			additional_x = max(0, additional_x);
+			additional_x = min(additional_x, LED_SIDE_COUNT - LED_BUFFER_SIZE * 2 - 1);
+
 			if (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == additional_y && PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == additional_x) { continue; }
+			if (j >= 2) {
+				if ( (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][0] - additional_y) % 2 != 0 && (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][1] - additional_x) % 2 != 0 &&
+					// ( (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == additional_y) != (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == additional_x)) && ((PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][0]) != (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][1]) ) )
+					( (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == additional_y) && (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][1]) || (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][0]) && (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == additional_x) ) )
+				{
+					PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] = additional_y;
+					PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] = additional_x;
+					continue;
+				}
+			}
+			if (additional_x == new_x && additional_y == new_y) { continue; }
 			addToCoordsArray(additional_y, additional_x);
 		}
 
