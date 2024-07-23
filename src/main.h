@@ -39,7 +39,7 @@ const PROGMEM uint8_t VECTOR_DEFAULT_PATTERNS[][16][2] = {
     { {0,0}, {0,1}, {0,2}, {0,3}, {0,4}, {0,5}, {0,6}, {0,7}, {0,6}, {0,5}, {0,4}, {0,3}, {0,2}, {0,1} }
 };
 
-inline bool PATTERNS_NOARROW[PATTERN_COUNT + 1] = {true, true, false, false, false, false};
+inline bool PATTERNS_NOARROW[PATTERN_COUNT + 1] = {false, false, false, false, false, false};
 inline bool PATTERNS_MIRROR[PATTERN_COUNT + 1] = {false, false, false, false, false, false};
 inline bool PATTERNS_MIRROR_AXIS[PATTERN_COUNT + 1] = {false, false, false, false, false, false};
 

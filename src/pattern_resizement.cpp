@@ -118,7 +118,7 @@ void convertPatternSize(uint8_t array[][2], int size)
 
 		int lastPoint = PATTERN_VECTOR_SIZE - 1;
 		int distance_y = new_y - PATTERN_VECTOR_RESIZED[lastPoint][0], distance_x = new_x - PATTERN_VECTOR_RESIZED[lastPoint][1];
-		int additionalPointsAmount = math_getRoot(distance_x * distance_x + distance_y * distance_y);
+		int additionalPointsAmount = math_getRoot(distance_x * distance_x + distance_y * distance_y), additionalPointsCreated = 0;
 
 		for (int j = 1; j < additionalPointsAmount; j++)
 		{
@@ -133,10 +133,10 @@ void convertPatternSize(uint8_t array[][2], int size)
 			additional_x = min(additional_x, LED_SIDE_COUNT - LED_BUFFER_SIZE * 2 - 1);
 
 			if (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == additional_y && PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == additional_x) { continue; }
-			if (j >= 2) {
+			if (additionalPointsCreated > 1) {
 				if ( (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][0] - additional_y) % 2 != 0 && (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][1] - additional_x) % 2 != 0 &&
 					// ( (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == additional_y) != (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == additional_x)) && ((PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][0]) != (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][1]) ) )
-					( (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == additional_y) && (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][1]) || (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][0]) && (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == additional_x) ) )
+					( ((PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == additional_y) && (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][1])) || ((PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 2][0]) && (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == additional_x)) ) )
 				{
 					PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] = additional_y;
 					PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] = additional_x;
@@ -145,6 +145,7 @@ void convertPatternSize(uint8_t array[][2], int size)
 			}
 			if (additional_x == new_x && additional_y == new_y) { continue; }
 			addToCoordsArray(additional_y, additional_x);
+			additionalPointsCreated++;
 		}
 
 		if (i == size || (PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][0] == new_y && PATTERN_VECTOR_RESIZED[PATTERN_VECTOR_SIZE - 1][1] == new_x)) { continue; }
