@@ -70,7 +70,7 @@ void loop()
 
 void setupDefaultPattern()
 {
-	uint8_t VECTOR_CURR_EXERCISE[32][2];
+	uint8_t VECTOR_CURR_EXERCISE[16][2];
   uint8_t size = pgm_read_byte(&(VECTOR_DEFAULT_PATTERNS_SIZES[matrix_regime]));
   Serial.println(size);
   for (int i = 0; i < size; i++)
@@ -109,13 +109,14 @@ void setupNewPattern()
   
 
 	int exercise_length = exercise_datapackage[EXERCISE_SECURITY_CODE_LENGTH];
-	uint8_t VECTOR_NEW_EXERCISE[32][2];
+	uint8_t VECTOR_NEW_EXERCISE[EXERCISE_PATTERN_DATA_LENGTH][2];
 	for (int i = 0; i < exercise_length; i++)
 	{
 		VECTOR_NEW_EXERCISE[i][0] = exercise_datapackage[i * 2 + EXERCISE_SECURITY_CODE_LENGTH + 1];
 		VECTOR_NEW_EXERCISE[i][1] = exercise_datapackage[i * 2 + EXERCISE_SECURITY_CODE_LENGTH + 2];
 	}
 	PATTERNS_MIRROR[PATTERN_COUNT] = (exercise_datapackage[EXERCISE_DATAPACKAGE_SIZE - EXERCISE_SECURITY_CODE_LENGTH - 2] != 0);
+  if (PATTERNS_MIRROR[PATTERN_COUNT]) { PATTERNS_MIRROR_AXIS[PATTERN_COUNT] = exercise_datapackage[EXERCISE_DATAPACKAGE_SIZE - EXERCISE_SECURITY_CODE_LENGTH - 2] % 2; }
 	PATTERNS_NOARROW[PATTERN_COUNT] = (exercise_datapackage[EXERCISE_DATAPACKAGE_SIZE - EXERCISE_SECURITY_CODE_LENGTH - 1] != 1);
 
 	convertPatternSize(VECTOR_NEW_EXERCISE, exercise_length);

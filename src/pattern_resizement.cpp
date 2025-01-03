@@ -36,8 +36,6 @@ void addToCoordsArray(int y, int x)
 
 void addOffsetToVector(int patternN)
 {
-	bool shouldMirror = PATTERNS_MIRROR[patternN];
-
 	int height = 0, width = 0;
 	for (int i = 0; i < PATTERN_VECTOR_SIZE; i++)
 	{
@@ -47,11 +45,9 @@ void addOffsetToVector(int patternN)
 	height++; width++;
 
 	int offset_x = (LED_SIDE_COUNT - width) / 2 + 1, offset_y = (LED_SIDE_COUNT - height) / 2 + 1;
-	shouldMirror = shouldMirror && (height != width);
-	if (shouldMirror)
+	if (PATTERNS_MIRROR[patternN])
 	{
-		bool mirror_vertical = (height < width);
-		if (mirror_vertical)
+		if (PATTERNS_MIRROR_AXIS[patternN])
 		{
 			offset_y = LED_SIDE_COUNT / 2 - height + 1;
 		}
@@ -59,9 +55,7 @@ void addOffsetToVector(int patternN)
 		{
 			offset_x = LED_SIDE_COUNT / 2 - width + 1;
 		}
-		PATTERNS_MIRROR_AXIS[patternN] = mirror_vertical;
 	}
-	PATTERNS_MIRROR[patternN] = shouldMirror;
 
 	for (int i = 0; i < PATTERN_VECTOR_SIZE; i++)
 	{
@@ -86,6 +80,18 @@ void convertPatternSize(uint8_t array[][2], int size)
 		width = max(width, array[i][1]);
 	}
 	height++; width++;
+
+	if (PATTERNS_MIRROR[matrix_regime])
+	{
+		if (PATTERNS_MIRROR_AXIS[matrix_regime])
+		{
+			height *= 2;
+		}
+		else
+		{
+			width *= 2;
+		}
+	}
 
 	float conversionSize;
 	if (height >= width)
